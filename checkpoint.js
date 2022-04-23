@@ -33,7 +33,7 @@ const {
 // < 16
 
 function exponencial(exp) {
-
+    return function(num) {return Math.pow(num,exp)};
 }
 
 // ----- Recursión -----
@@ -69,8 +69,18 @@ function exponencial(exp) {
 // haciendo los movimientos SUR->ESTE->NORTE
 // Aclaraciones: el segundo parametro que recibe la funcion ('direccion') puede ser pasado vacio (null)
 
-function direcciones(laberinto) {
-
+function direcciones(laberinto, direccion = []) {
+    for (key in laberinto) {
+        if (typeof laberinto[key] === "object") {
+            direccion.push(key);
+            return direcciones(laberinto[key], direccion);
+        }
+        if (laberinto[key] === 'destino') {
+            direccion.push(key);      
+            return direccion.join('');
+        }
+    }
+    return '';
 }
 
 
@@ -88,7 +98,20 @@ function direcciones(laberinto) {
 // deepEqualArrays([0,1,[[0,1,2],1,2]], [0,1,[[0,1,2],1,2]]) => true
 
 function deepEqualArrays(arr1, arr2) {
-
+    /*comprobar que los arrays tengan el mismo length
+      comparar elemento por elemento en un for
+      si el elemento es un array anidado ingresar con recursividad
+      retornar true o false */
+    if (arr1.length !== arr2.length) return false;
+    for (let i = 0; i < arr1.length; i++) {
+        if (Array.isArray(arr1[i]) && Array.isArray(arr2[i])) {
+            if (!deepEqualArrays(arr1[i], arr2[i])) return false;            
+        }
+        if (arr1[i] !== arr2[i]) {
+            return false;
+        } else {return true;}
+    }
+    return true;
 }
 
 
@@ -138,8 +161,37 @@ OrderedLinkedList.prototype.print = function(){
 // > LL.print()
 // < 'head --> 5 --> 3 --> 1 --> null'
 //               4
-OrderedLinkedList.prototype.add = function(val){
-    
+OrderedLinkedList.prototype.add = function(value){
+    let node = new Node(value);
+    if(!this.head){
+        this.head = node;
+        return
+    }
+        if(!this.head.next){
+        if(this.head.value > value){
+        this.head.next = node
+        return
+        }
+        node.next = this.head;
+        this.head = node
+        return
+        }
+  if(value > this.head.value){
+    node.next = this.head;
+    this.head = node
+    return
+  }
+  let current = this.head
+  while(current.next){
+    if(current.next.value < value){
+      node.next = current.next;
+      current.next = node;
+      return
+    }
+    current = current.next
+  }
+  current.next = node;
+  return
 }
 
 
@@ -230,8 +282,11 @@ function multiCallbacks(cbs1, cbs2){
 // 5   9
 // resultado:[5,8,9,32,64]
 
-BinarySearchTree.prototype.toArray = function() {
-    
+BinarySearchTree.prototype.toArray = function(arbol = []) {
+    if (this.left) this.left.toArray(arbol);
+    arbol.push(this.value);
+    if (this.right) this.right.toArray(arbol);
+    return arbol.sort((a, b) => a - b);
 }
 
 
@@ -250,7 +305,14 @@ BinarySearchTree.prototype.toArray = function() {
 // informarse sobre algoritmos, leerlos de un pseudocodigo e implemnterlos alcanzara
 
 function primalityTest(n) {
-    
+    if (n <= 3) return n > 1;
+    if ((n % 2 === 0) || (n % 3 === 0)) return false;
+    let count = 5;
+    while (Math.pow(count, 2) <= n) {
+      if (n % count === 0 || n % (count + 2) === 0) return false;
+      count += 6;
+    }  
+    return true;
 }
 
 
@@ -260,7 +322,22 @@ function primalityTest(n) {
 // https://en.wikipedia.org/wiki/Quicksort
 
 function quickSort(array) {
-    
+    let lower = [], equal = [], upper = [];
+    if (array.length > 1) {
+        let pivot = array[Math.floor(Math.random() * array.length)];
+        for (let i = 0; i < array.length; i++) {
+          if (array[i] > pivot) {
+            lower.push(array[i]);
+          } else if (array[i] < pivot) {
+            upper.push(array[i]);
+          } else {
+            equal.push(array[i]);
+          }
+        }
+    } else {
+      return array;
+    }
+    return quickSort(lower).concat(equal).concat(quickSort(upper));    
 }
 // QuickSort ya lo conocen solo que este 
 // ordena de mayor a menor
@@ -283,7 +360,13 @@ function quickSort(array) {
 // < 32859
 
 function reverse(num){
-    
+    let rev = 0;
+    let numDigits = Math.floor(Math.log10(num));
+    for (let i = 0; i < numDigits; i++) {
+        rev = rev + (num%10)*Math.pow(10,Math.floor(Math.log10(num)));
+        num = Math.floor(num/10);
+    }
+    return rev + num;
 }
 // la grandiosa resolucion de Wilson!!!
 // declaran una variable donde 
